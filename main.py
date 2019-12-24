@@ -34,7 +34,9 @@ def get_ascii(image, gray_scale, columns, scale) :
     # break up the image into tiles and return a character based on the
     # average brightness of each indiviual tile
     for j in range(rows) :
-        print("Progress: %d%% done" % ((j+1)*100 / rows))
+        # progress bar
+        sys.stdout.write("\rProgress: %d%% done (%d / %d)" % (((j+1)*100 / rows), j + 1, rows))
+        sys.stdout.flush()
         # find tile dimensions
         y_start = int(j*tile_height)
         y_end = int((j+1)*tile_height)
@@ -60,6 +62,8 @@ def get_ascii(image, gray_scale, columns, scale) :
             # append a character based on the lightness of the tile
             image_ascii[j] += gray_scale[int(average_lightness(tile)*69)/255]
 
+    # newline 
+    print("")
     return image_ascii
 
 def main() :
