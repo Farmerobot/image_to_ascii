@@ -16,14 +16,25 @@ def get_ascii(image, gray_scale, columns, scale) :
     image_ascii = []
 
     width, height = image.size[0], image.size[1]
+    
     tile_width = width/columns
     tile_height = tile_width/scale
 
     rows = int(height/tile_height)
+
+    print("Target size in characters: %d x %d" % (columns, rows))
     
+    # prevent the tile width from becoming 0
+    if columns > width or rows > height :
+        print("Error: Image is too small for the specified amount of columns")
+        exit(0)
+
+    print("Generating image...")
+
     # break up the image into tiles and return a character based on the
     # average brightness of each indiviual tile
     for j in range(rows) :
+        print("Progress: %d%% done" % ((j+1)*100 / rows))
         # find tile dimensions
         y_start = int(j*tile_height)
         y_end = int((j+1)*tile_height)
@@ -40,7 +51,7 @@ def get_ascii(image, gray_scale, columns, scale) :
             x_start = int(i*tile_width)
             x_end = int((i+1)*tile_width)
 
-            if j == columns - 1 :
+            if i == columns - 1 :
                 x_end = width
 
             # get a tile from the dimensions by cropping the image 
@@ -52,22 +63,37 @@ def get_ascii(image, gray_scale, columns, scale) :
     return image_ascii
 
 def main() :
+    # argument format: [input] [output] [size]
     arguments = len(sys.argv) - 1
     if arguments == 0 :
-        print("Specify a file")
+        print("Invalid parameters")
+        print("Please use one of the folowing input formats:")
+        print("\t- img_to_ascii [input file]")
+        print("\t- img_to_ascii [input file] [output file]")
+        print("\t- img_to_ascii [input file] [output file] [target width in characters]")
         return
-    elif arguments > 2 :
+    elif arguments > 3 :
         print("Too many arguments")
         return
     else :
+        # set the default output file name
+        output_file_name = "output.txt"
         print("File name: %s" % sys.argv[1])
-        if arguments == 2 :
+        if arguments > 1 :
             output_file_name = sys.argv[2]
+
+        # number of horizontal tiles and their ratio to the number of vertical tiles
+        # This number depends on the font one is using:
+        # its spacing, width and height in pixles
+        if arguments == 3 :
+            # columns = ((int(sys.argv[3])/46)*46)
+            columns = int(sys.argv[3])
         else :
-            output_file_name = "output.txt"
+            columns = 46
+        scale = 0.46
 
     # define a scale proprtional to the average lightness of an image 
-    gray_scale = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~i!lI;:,\"^`\'. "
+    gray_scale = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
 
     # open image and convert it to grayscale
     image = Image.open(sys.argv[1]).convert('L')
@@ -76,12 +102,6 @@ def main() :
     width, height = image.size[0], image.size[1]
 
     print("Image size: %d x %d px" % (width, height))
-    
-    # number of horizontal tiles and their ratio to the number of vertical tiles
-    # This number depends on the font one is using:
-    # its spacing, width and height in pixles
-    columns = 46
-    scale = 0.46
 
     output = get_ascii(image, gray_scale, columns, scale)
 
@@ -93,6 +113,9 @@ def main() :
         output_file.write(row + "\n")
 
     output_file.close()
+
+    print("Ascii art succesfully generated")
+    print("Output file name: %s" % output_file_name)
 
 if __name__ == "__main__" :
     main()
