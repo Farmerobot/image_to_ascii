@@ -17,8 +17,10 @@ def get_ascii(image, gray_scale, columns, scale) :
 
     width, height = image.size[0], image.size[1]
     
-    tile_width = width/columns
-    tile_height = tile_width/scale
+    tile_width = width/float(columns)
+    tile_height = tile_width/float(scale)
+
+    print(tile_width)
 
     rows = int(height/tile_height)
 
